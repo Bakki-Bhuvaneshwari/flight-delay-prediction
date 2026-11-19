@@ -1,10 +1,11 @@
 
 pandas
 numpy
-scikit-learn
+scikit-learn==1.7.2
 joblib
 streamlit
 fastapi
 uvicorn
 jinja2
 python-multipart
+
