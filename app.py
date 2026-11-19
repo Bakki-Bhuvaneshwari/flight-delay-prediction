@@ -33,9 +33,10 @@ if model_features is not None and list(model_features) != FEATURES:
     )
 
 
-# Home page - directly serve HTML
+# Home page
 @app.get("/", response_class=HTMLResponse)
 async def home():
+
     html_path = BASE_DIR / "templates" / "index.html"
 
     if not html_path.exists():
@@ -52,6 +53,7 @@ async def home():
 # Prediction
 @app.post("/predict")
 async def predict(request: Request):
+
     try:
         data = await request.json()
 
@@ -71,6 +73,7 @@ async def predict(request: Request):
                 content={"error": f"Missing fields: {missing}"}
             )
 
+        # Convert date
         flight_date = pd.to_datetime(
             data["FL_DATE"], errors="coerce"
         )
@@ -81,11 +84,12 @@ async def predict(request: Request):
                 content={"error": "Invalid flight date"}
             )
 
+        # Prepare input
         input_data = {
-            "YEAR": FL_DATE.year,
-            "MONTH": FL_DATE.month,
-            "DAY": FL_DATE.day,
-            "DAY_OF_WEEK": FL_DATE.dayofweek,
+            "YEAR": flight_date.year,
+            "MONTH": flight_date.month,
+            "DAY": flight_date.day,
+            "DAY_OF_WEEK": flight_date.dayofweek,
             "AIRLINE": str(data["AIRLINE"]).strip(),
             "ORIGIN": str(data["ORIGIN"]).strip(),
             "DEST": str(data["DEST"]).strip(),
@@ -98,6 +102,7 @@ async def predict(request: Request):
             columns=FEATURES
         )
 
+        # Prediction
         prediction = model.predict(input_df)[0]
 
         return {
@@ -126,6 +131,4 @@ async def predict(request: Request):
 
 @app.get("/health")
 async def health():
-    return {"status": "Application running successfully"}
-
-
+    return {"status": "Application running"}
